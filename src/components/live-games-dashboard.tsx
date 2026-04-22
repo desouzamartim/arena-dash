@@ -1,8 +1,10 @@
 "use client";
 
+import { SiteHeader } from "@/components/site-header";
 import { WinProbability } from "@/lib/odds-api";
 import { getTeamLogo, NbaGame, NbaTeam } from "@/lib/nba-api";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 
 const REFRESH_INTERVAL_MS = 90_000;
@@ -140,57 +142,6 @@ function WinProbabilityBar({
   );
 }
 
-function Ticker({ games }: { games: NbaGame[] }) {
-  const liveGames = games.filter((game) => game.status === "live");
-  const tickerGames = liveGames.length > 0 ? liveGames : games;
-  const items = tickerGames.length > 0 ? [...tickerGames, ...tickerGames] : [];
-
-  return (
-    <section className="liveTicker" aria-label="Jogos acontecendo agora">
-      <div className="tickerLabel">
-        <span className={liveGames.length > 0 ? "liveDot isLive" : "liveDot"} />
-        <strong>{liveGames.length > 0 ? "Ao vivo" : "Sem jogos ao vivo agora"}</strong>
-      </div>
-      <div className="tickerTrackWrap">
-        <div className="tickerTrack">
-          {items.map((game, index) => (
-            <div className="tickerItem" key={`${game.id}-${index}`}>
-              <Image src={getTeamLogo(game.awayTeam.id)} alt="" width={26} height={26} />
-              <span>{game.awayTeam.abbreviation}</span>
-              <strong>
-                {game.status === "scheduled"
-                  ? game.timeBr
-                  : `${game.awayTeam.score}-${game.homeTeam.score}`}
-              </strong>
-              <span>{game.homeTeam.abbreviation}</span>
-              <Image src={getTeamLogo(game.homeTeam.id)} alt="" width={26} height={26} />
-              {game.broadcastsBrazil.length > 0 ? (
-                <em>{game.broadcastsBrazil.join(" + ")}</em>
-              ) : null}
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function SportNav() {
-  return (
-    <nav className="sportNav" aria-label="Navegacao de esportes">
-      <div className="sportNavInner">
-        <strong>ArenaDash</strong>
-        <div>
-          <a aria-disabled="true">NBA</a>
-          <a aria-disabled="true">NFL</a>
-          <a aria-disabled="true">NHL</a>
-          <a aria-disabled="true">MLB</a>
-        </div>
-      </div>
-    </nav>
-  );
-}
-
 function FeaturedGame({
   game,
   prediction
@@ -204,7 +155,7 @@ function FeaturedGame({
       : "NBA League Pass";
 
   return (
-    <article className="featuredGame">
+    <Link className="featuredGame gameCardLink" href={`/jogos/${game.id}`}>
       <div className="featuredTop">
         <span className={`status ${game.status}`}>{getStatusLabel(game)}</span>
         <span>{game.stage}</span>
@@ -222,7 +173,7 @@ function FeaturedGame({
         <span>{broadcasts}</span>
         {game.seriesText ? <span>{game.seriesText}</span> : null}
       </div>
-    </article>
+    </Link>
   );
 }
 
@@ -307,8 +258,7 @@ export function LiveGamesDashboard({
 
   return (
     <>
-      <Ticker games={games} />
-      <SportNav />
+      <SiteHeader games={games} />
       <div className="contentContainer">
         {isRefreshing ? <div className="refreshSkeleton" aria-hidden="true" /> : null}
         <TodayHighlights games={games} predictions={predictions} />

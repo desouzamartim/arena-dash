@@ -114,7 +114,7 @@ p {
 }
 
 .adBannerMiddle {
-  margin: 2px 0 24px;
+  margin: 12px 0 12px;
 }
 
 .adBannerBottom {
@@ -618,6 +618,28 @@ h1 {
   background: rgba(255, 255, 255, 0.035);
 }
 
+.gameCardLink {
+  color: inherit;
+  text-decoration: none;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.gameCardLink:hover {
+  border-color: rgba(255, 255, 255, 0.24);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.095), rgba(255, 255, 255, 0.035)),
+    rgba(255, 255, 255, 0.04);
+  transform: translateY(-2px);
+}
+
+.gameCardLink:focus-visible {
+  outline: 2px solid rgba(246, 200, 95, 0.8);
+  outline-offset: 3px;
+}
+
 .compactGameSkeleton {
   min-height: 134px;
 }
@@ -1109,6 +1131,466 @@ h2 {
     var(--home-color);
 }
 
+.gameDetailShell {
+  --game-section-gap: 18px;
+
+  min-height: 100vh;
+  padding: 132px 24px 42px;
+}
+
+.gameDetailContainer {
+  display: grid;
+  gap: var(--game-section-gap);
+  min-width: 0;
+  width: min(1120px, 100%);
+  margin: 0 auto;
+}
+
+.gameDetailTopbar {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: calc(var(--game-section-gap) * -0.5);
+}
+
+.backLink {
+  display: inline-grid;
+  grid-template-columns: 20px auto;
+  gap: 7px;
+  align-items: center;
+  width: fit-content;
+  padding: 5px 9px 5px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.035);
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    border-color 160ms ease,
+    color 160ms ease,
+    background 160ms ease;
+}
+
+.backLink span {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: rgba(247, 248, 251, 0.82);
+  background: rgba(255, 255, 255, 0.055);
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.backLink:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  color: var(--foreground);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.backLink:focus-visible {
+  outline: 2px solid rgba(246, 200, 95, 0.8);
+  outline-offset: 3px;
+}
+
+.gameDetailHero,
+.gameInfoPanel,
+.highlightPanel,
+.gameStatsPanel,
+.gameNewsPanel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025)),
+    var(--surface-strong);
+  box-shadow: var(--panel-shadow);
+}
+
+.gameDetailHero {
+  display: grid;
+  gap: 34px;
+  padding: 26px;
+}
+
+.gameDetailHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: start;
+}
+
+.gameDetailHeader h1 {
+  margin-top: 12px;
+  font-size: clamp(2.3rem, 7vw, 5.2rem);
+  line-height: 0.92;
+}
+
+.gameDetailHeader p {
+  max-width: 320px;
+  color: var(--muted);
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.45;
+  text-align: right;
+}
+
+.gameDetailMatchup {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(160px, 260px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: center;
+}
+
+.gameDetailTeam {
+  display: flex;
+  min-width: 0;
+  gap: 16px;
+  align-items: center;
+}
+
+.gameDetailTeam-right {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.gameDetailTeam > div:last-child {
+  min-width: 0;
+}
+
+.gameDetailTeam span,
+.gameDetailTeam small {
+  display: block;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.gameDetailTeam span {
+  font-size: 0.84rem;
+}
+
+.gameDetailTeam strong {
+  display: block;
+  overflow: hidden;
+  font-size: clamp(1.35rem, 3vw, 2.2rem);
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gameDetailTeam small {
+  margin-top: 4px;
+  font-size: 0.76rem;
+}
+
+.gameDetailLogo {
+  display: grid;
+  flex: 0 0 auto;
+  width: 96px;
+  height: 96px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--team-color) 54%, white);
+  border-radius: 8px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.14), transparent),
+    color-mix(in srgb, var(--team-color) 22%, #0d1322);
+}
+
+.gameDetailLogo img {
+  width: 76px;
+  height: 76px;
+  object-fit: contain;
+}
+
+.gameDetailScore {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--muted);
+  text-align: center;
+}
+
+.gameDetailScore strong {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  color: var(--foreground);
+  font-size: clamp(2.2rem, 5vw, 4.4rem);
+  line-height: 0.9;
+}
+
+.gameDetailScore small {
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.gameDetailScore > span {
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.gameDetailGrid {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.75fr) minmax(0, 1.25fr);
+  gap: 18px;
+}
+
+.gameStatsPanel {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+}
+
+.gameDetailContainer > .adBanner {
+  margin: 0;
+}
+
+.gameStatsHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: end;
+}
+
+.gameStatsHeader h2 {
+  margin-top: 8px;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+}
+
+.gameStatsHeader > div:last-child {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.statsList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.statCompare {
+  display: grid;
+  grid-template-columns: minmax(54px, 0.8fr) minmax(92px, 1.4fr) minmax(54px, 0.8fr);
+  gap: 8px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.statCompare strong {
+  color: var(--foreground);
+  font-size: 1rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.statCompare span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.gameInfoPanel,
+.highlightPanel {
+  padding: 22px;
+}
+
+.gameNewsPanel {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+}
+
+.gameNewsHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: end;
+}
+
+.gameNewsHeader h2 {
+  margin-top: 8px;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+}
+
+.gameNewsHeader p {
+  max-width: 360px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: right;
+}
+
+.gameNewsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.newsCard {
+  display: grid;
+  min-height: 196px;
+  align-content: start;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.035);
+  text-decoration: none;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.newsCard img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 6px;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.newsCard:hover {
+  border-color: rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateY(-2px);
+}
+
+.newsCard:focus-visible {
+  outline: 2px solid rgba(246, 200, 95, 0.8);
+  outline-offset: 3px;
+}
+
+.newsCard span,
+.newsCard small {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.newsCard strong {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--foreground);
+  font-size: 1rem;
+  line-height: 1.24;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.newsCard p {
+  display: -webkit-box;
+  overflow: hidden;
+  color: rgba(169, 176, 195, 0.86);
+  font-size: 0.84rem;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.emptyNews {
+  display: grid;
+  min-height: 132px;
+  place-items: center;
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  color: var(--muted);
+  font-weight: 800;
+  text-align: center;
+}
+
+.gameInfoPanel dl {
+  display: grid;
+  gap: 14px;
+  margin: 20px 0 0;
+}
+
+.gameInfoPanel div {
+  display: grid;
+  gap: 5px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.gameInfoPanel div:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.gameInfoPanel dt {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.gameInfoPanel dd {
+  margin: 0;
+  color: var(--foreground);
+  font-weight: 800;
+}
+
+.highlightPanel {
+  display: grid;
+  gap: 18px;
+}
+
+.highlightPanel h2 {
+  margin-top: 8px;
+}
+
+.highlightFrame {
+  display: grid;
+  aspect-ratio: 16 / 9;
+  min-height: 0;
+  place-items: center;
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(29, 66, 138, 0.18), rgba(200, 16, 46, 0.1)),
+    rgba(255, 255, 255, 0.035);
+  text-align: center;
+}
+
+.highlightFrame iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 8px;
+}
+
+.highlightFrame div {
+  display: grid;
+  max-width: 360px;
+  gap: 8px;
+  padding: 24px;
+}
+
+.highlightFrame strong {
+  font-size: 1rem;
+}
+
+.highlightFrame span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
 @keyframes tickerScroll {
   from {
     transform: translateX(0);
@@ -1154,6 +1636,15 @@ h2 {
 
   .heroStats {
     max-width: 460px;
+  }
+
+  .gameDetailGrid,
+  .gameDetailMatchup {
+    grid-template-columns: 1fr;
+  }
+
+  .gameDetailScore {
+    order: 3;
   }
 }
 
@@ -1226,6 +1717,54 @@ h2 {
 
   .featuredGame {
     min-height: auto;
+  }
+
+  .gameDetailShell {
+    padding: 124px 18px 24px;
+  }
+
+  .gameDetailHero {
+    padding: 18px;
+  }
+
+  .gameDetailHeader {
+    display: grid;
+  }
+
+  .gameDetailHeader p {
+    text-align: left;
+  }
+
+  .gameDetailTeam-right {
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .highlightFrame {
+    min-height: 0;
+  }
+
+  .highlightFrame iframe {
+    min-height: 0;
+  }
+
+  .gameStatsHeader,
+  .gameNewsHeader,
+  .statsList {
+    grid-template-columns: 1fr;
+  }
+
+  .gameStatsHeader,
+  .gameNewsHeader {
+    display: grid;
+  }
+
+  .gameNewsHeader p {
+    text-align: left;
+  }
+
+  .gameNewsGrid {
+    grid-template-columns: 1fr;
   }
 }
 

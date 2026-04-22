@@ -25,6 +25,23 @@ export type NbaGame = {
   awayTeam: NbaTeam;
 };
 
+export type NbaTeamGameStats = {
+  points: number;
+  rebounds: number;
+  assists: number;
+  steals: number;
+  blocks: number;
+  turnovers: number;
+  fieldGoalPercentage: number;
+  threePointPercentage: number;
+  freeThrowPercentage: number;
+};
+
+export type NbaGameStats = {
+  home: NbaTeamGameStats;
+  away: NbaTeamGameStats;
+};
+
 type NbaApiTeam = {
   teamId: number;
   teamName: string;
@@ -98,6 +115,28 @@ type NbaChannelsResponse = {
   };
 };
 
+type NbaBoxScoreTeam = Partial<{
+  statistics: Partial<{
+    points: number;
+    rebounds: number;
+    reboundsTotal: number;
+    assists: number;
+    steals: number;
+    blocks: number;
+    turnovers: number;
+    fieldGoalsPercentage: number;
+    threePointersPercentage: number;
+    freeThrowsPercentage: number;
+  }>;
+}>;
+
+type NbaBoxScoreResponse = {
+  game?: {
+    homeTeam?: NbaBoxScoreTeam;
+    awayTeam?: NbaBoxScoreTeam;
+  };
+};
+
 type BrazilBroadcastChannel = "Prime Video" | "ESPN/Disney+" | "NBA League Pass";
 
 const SCOREBOARD_URL =
@@ -106,6 +145,7 @@ const CHANNELS_URL =
   "https://cdn.nba.com/static/json/liveData/channels/v2/channels_00.json";
 const SCHEDULE_URL =
   "https://cdn.nba.com/static/json/staticData/scheduleLeagueV2_1.json";
+const BOXSCORE_URL = "https://cdn.nba.com/static/json/liveData/boxscore";
 
 const TEAM_COLORS: Record<string, string> = {
   ATL: "#e03a3e",
@@ -749,6 +789,26 @@ function normalizeScheduleGame(game: NbaScheduleGame, gameDate: string): NbaGame
   };
 }
 
+function normalizeBoxScoreStats(team?: NbaBoxScoreTeam): NbaTeamGameStats | null {
+  const stats = team?.statistics;
+
+  if (!stats) {
+    return null;
+  }
+
+  return {
+    points: Number(stats.points ?? 0),
+    rebounds: Number(stats.reboundsTotal ?? stats.rebounds ?? 0),
+    assists: Number(stats.assists ?? 0),
+    steals: Number(stats.steals ?? 0),
+    blocks: Number(stats.blocks ?? 0),
+    turnovers: Number(stats.turnovers ?? 0),
+    fieldGoalPercentage: Number(stats.fieldGoalsPercentage ?? 0),
+    threePointPercentage: Number(stats.threePointersPercentage ?? 0),
+    freeThrowPercentage: Number(stats.freeThrowsPercentage ?? 0)
+  };
+}
+
 export function getTeamLogo(teamId: number) {
   return `https://cdn.nba.com/logos/nba/${teamId}/primary/L/logo.svg`;
 }
@@ -837,6 +897,55 @@ export async function getScheduleTeams() {
   return Array.from(teamMap.values())
     .filter((team) => NBA_TEAM_IDS.has(team.id))
     .sort((a, b) => `${a.city} ${a.name}`.localeCompare(`${b.city} ${b.name}`));
+}
+
+export async function getGameById(gameId: string) {
+  const [todayGames, scheduleGames] = await Promise.all([
+    getTodayGames(),
+    getScheduleGames()
+  ]);
+
+  const game =
+    todayGames.find((currentGame) => currentGame.id === gameId) ??
+    scheduleGames.find((currentGame) => currentGame.id === gameId);
+
+  if (!game) {
+    return null;
+  }
+
+  const [hydratedGame] = await withTodayBroadcastChannels([game]);
+
+  return hydratedGame;
+}
+
+export async function getGameStatsById(gameId: string): Promise<NbaGameStats | null> {
+  try {
+    const response = await fetch(`${BOXSCORE_URL}/boxscore_${gameId}.json`, {
+      cache: "no-store",
+      next: {
+        revalidate: 0
+      }
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = (await response.json()) as NbaBoxScoreResponse;
+    const home = normalizeBoxScoreStats(data.game?.homeTeam);
+    const away = normalizeBoxScoreStats(data.game?.awayTeam);
+
+    if (!home || !away) {
+      return null;
+    }
+
+    return {
+      home,
+      away
+    };
+  } catch {
+    return null;
+  }
 }
 
 function hasBrazilianBroadcast(game: NbaGame) {

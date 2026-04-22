@@ -2,6 +2,7 @@
 
 import { getTeamLogo, NbaGame, NbaTeam } from "@/lib/nba-api";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type AdvancedGamesFilterProps = {
@@ -55,7 +56,7 @@ function CompactGameCard({ game }: { game: NbaGame }) {
       : "NBA League Pass";
 
   return (
-    <article className="compactGameCard">
+    <Link className="compactGameCard gameCardLink" href={`/jogos/${game.id}`}>
       <div className="compactGameTop">
         <span className={`compactStatus ${game.status}`}>{getGameStatus(game)}</span>
         <span>{formatDate(game.date)}</span>
@@ -91,7 +92,7 @@ function CompactGameCard({ game }: { game: NbaGame }) {
         <span>{game.stage}</span>
         <strong>{broadcasts}</strong>
       </div>
-    </article>
+    </Link>
   );
 }
 
