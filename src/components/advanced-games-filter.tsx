@@ -2,7 +2,7 @@
 
 import { getTeamLogo, NbaGame, NbaTeam } from "@/lib/nba-api";
 import Image from "next/image";
-import { FormEvent, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type AdvancedGamesFilterProps = {
   initialGames: NbaGame[];
@@ -30,7 +30,7 @@ function getGameStatus(game: NbaGame) {
 }
 
 function formatLiveClock(period: number, clock: string) {
-  const periodLabel = period > 0 ? `${period}º quarto` : "Ao vivo";
+  const periodLabel = period > 0 ? `${period}o quarto` : "Ao vivo";
   const match = clock.match(/PT(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?/);
 
   if (!match) {
@@ -48,11 +48,11 @@ function formatLiveClock(period: number, clock: string) {
 }
 
 function CompactGameCard({ game }: { game: NbaGame }) {
-  const hasScore = game.status !== "scheduled";
+  const hasScore = game.status === "final";
   const broadcasts =
     game.broadcastsBrazil.length > 0
       ? game.broadcastsBrazil.join(" + ")
-      : "Transmissao a confirmar";
+      : "NBA League Pass";
 
   return (
     <article className="compactGameCard">
@@ -95,12 +95,30 @@ function CompactGameCard({ game }: { game: NbaGame }) {
   );
 }
 
+function CompactGameSkeleton() {
+  return (
+    <article className="compactGameCard compactGameSkeleton" aria-hidden="true">
+      <div className="skeletonLine short" />
+      <div className="skeletonMatch">
+        <div className="skeletonLogo" />
+        <div className="skeletonLine medium" />
+        <div className="skeletonLine tiny" />
+        <div className="skeletonLine medium" />
+        <div className="skeletonLogo" />
+      </div>
+      <div className="skeletonLine long" />
+    </article>
+  );
+}
+
 export function AdvancedGamesFilter({ initialGames, teams }: AdvancedGamesFilterProps) {
   const [games, setGames] = useState(initialGames);
   const [teamId, setTeamId] = useState("");
   const [date, setDate] = useState("");
+  const [broadcastScope, setBroadcastScope] = useState<"all" | "br">("all");
   const [isLoading, setIsLoading] = useState(false);
   const [hasActiveFilter, setHasActiveFilter] = useState(false);
+  const dateInputRef = useRef<HTMLInputElement>(null);
 
   const resultLabel = useMemo(() => {
     if (hasActiveFilter) {
@@ -126,9 +144,7 @@ export function AdvancedGamesFilter({ initialGames, teams }: AdvancedGamesFilter
     }
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
+  useEffect(() => {
     const params = new URLSearchParams();
 
     if (teamId) {
@@ -139,13 +155,39 @@ export function AdvancedGamesFilter({ initialGames, teams }: AdvancedGamesFilter
       params.set("date", date);
     }
 
-    fetchGames(params, Boolean(teamId || date));
-  }
+    if (broadcastScope === "br") {
+      params.set("broadcastScope", "br");
+    }
+
+    const filtered = Boolean(teamId || date || broadcastScope === "br");
+    const timeoutId = window.setTimeout(() => {
+      fetchGames(params, filtered);
+    }, 350);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [teamId, date, broadcastScope]);
 
   function handleClear() {
     setTeamId("");
     setDate("");
+    setBroadcastScope("all");
     fetchGames(new URLSearchParams(), false);
+  }
+
+  function openDatePicker() {
+    const input = dateInputRef.current;
+
+    if (!input) {
+      return;
+    }
+
+    try {
+      input.showPicker?.();
+    } catch {
+      // Fallback para navegadores que bloqueiam showPicker.
+    }
+
+    input.focus();
   }
 
   return (
@@ -161,43 +203,89 @@ export function AdvancedGamesFilter({ initialGames, teams }: AdvancedGamesFilter
         </p>
       </div>
 
-      <form className="filterBar" onSubmit={handleSubmit}>
-        <label>
+      <div className="filterBar">
+        <label className="filterField">
           <span>Time</span>
           <select value={teamId} onChange={(event) => setTeamId(event.target.value)}>
             <option value="">Todos os times</option>
             {teams.map((team) => (
               <option key={team.id} value={team.id}>
-                {team.city} {team.name}
+                {team.city} {team.name} ({team.abbreviation})
               </option>
             ))}
           </select>
         </label>
 
-        <label>
+        <label className="filterField">
           <span>Data</span>
-          <input
-            type="date"
-            value={date}
-            onChange={(event) => setDate(event.target.value)}
-          />
+          <div
+            className="dateInputWrap"
+            onClick={openDatePicker}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                openDatePicker();
+              }
+            }}
+            role="button"
+            tabIndex={0}
+          >
+            <input
+              ref={dateInputRef}
+              type="date"
+              className={date ? "" : "is-empty"}
+              aria-label="Escolha uma data"
+              value={date}
+              onChange={(event) => setDate(event.target.value)}
+            />
+            {!date ? <small>Escolha uma data</small> : null}
+          </div>
         </label>
 
+        <fieldset className="broadcastToggle">
+          <legend>Onde assistir</legend>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="broadcastScope"
+                value="all"
+                checked={broadcastScope === "all"}
+                onChange={() => setBroadcastScope("all")}
+              />
+              <span>Todas</span>
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="broadcastScope"
+                value="br"
+                checked={broadcastScope === "br"}
+                onChange={() => setBroadcastScope("br")}
+              />
+              <span>BR</span>
+            </label>
+          </div>
+        </fieldset>
+
         <div className="filterActions">
-          <button type="submit" disabled={isLoading}>
-            {isLoading ? "Buscando..." : "Buscar"}
-          </button>
           <button type="button" onClick={handleClear} disabled={isLoading}>
             Limpar filtros
           </button>
         </div>
-      </form>
+      </div>
 
       <div className="resultsHeader">
         <span>{resultLabel}</span>
       </div>
 
-      {games.length > 0 ? (
+      {isLoading ? (
+        <div className="compactGamesGrid">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <CompactGameSkeleton key={index} />
+          ))}
+        </div>
+      ) : games.length > 0 ? (
         <div className="compactGamesGrid">
           {games.map((game) => (
             <CompactGameCard key={game.id} game={game} />

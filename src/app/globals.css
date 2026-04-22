@@ -44,7 +44,81 @@ p {
 
 .pageShell {
   min-height: 100vh;
-  padding: 94px 28px 32px;
+  padding: 146px 28px 32px;
+}
+
+.layoutWithAds {
+  display: grid;
+  grid-template-columns: minmax(96px, 140px) minmax(0, 1180px) minmax(96px, 140px);
+  gap: 18px;
+  justify-content: center;
+  align-items: start;
+}
+
+.mainColumn {
+  min-width: 0;
+}
+
+.adRail {
+  position: sticky;
+  top: 136px;
+  min-width: 0;
+}
+
+.adSlot {
+  display: grid;
+  min-height: 520px;
+  place-items: center;
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  color: rgba(169, 176, 195, 0.68);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018)),
+    rgba(12, 18, 32, 0.42);
+}
+
+.adSlot span {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.adBanner {
+  display: grid;
+  min-height: 92px;
+  place-items: center;
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  color: rgba(169, 176, 195, 0.68);
+  background:
+    linear-gradient(90deg, rgba(29, 66, 138, 0.1), rgba(200, 16, 46, 0.08)),
+    rgba(12, 18, 32, 0.4);
+}
+
+.adBanner span {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.adBannerMiddle {
+  margin: 2px 0 24px;
+}
+
+.adBannerBottom {
+  margin-top: 18px;
 }
 
 .liveTicker {
@@ -63,6 +137,69 @@ p {
     #080b14;
   box-shadow: 0 14px 42px rgba(0, 0, 0, 0.38);
   backdrop-filter: blur(18px);
+}
+
+.sportNav {
+  position: fixed;
+  z-index: 9;
+  top: 58px;
+  left: 0;
+  display: grid;
+  width: 100%;
+  min-height: 52px;
+  place-items: center;
+  padding: 0 28px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--foreground);
+  background: rgba(7, 10, 18, 0.72);
+  backdrop-filter: blur(18px);
+}
+
+.sportNavInner {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  width: min(100%, 1180px);
+  align-items: center;
+  gap: 24px;
+}
+
+.sportNavInner strong {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.sportNavInner div {
+  display: flex;
+  grid-column: 2;
+  gap: 26px;
+  align-items: center;
+  justify-content: center;
+}
+
+.sportNav a {
+  position: relative;
+  color: rgba(169, 176, 195, 0.82);
+  cursor: default;
+  font-size: 0.94rem;
+  font-weight: 800;
+  padding: 10px 2px;
+  text-decoration: none;
+}
+
+.sportNav a:first-child {
+  color: #ffffff;
+}
+
+.sportNav a:first-child::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -3px;
+  left: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent));
 }
 
 .tickerLabel {
@@ -206,6 +343,7 @@ h1 {
 }
 
 .contentContainer {
+  position: relative;
   max-width: 1180px;
   margin: 0 auto;
   padding: 20px;
@@ -218,23 +356,43 @@ h1 {
   backdrop-filter: blur(18px);
 }
 
+.refreshSkeleton {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 8px 8px 0 0;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.refreshSkeleton::before {
+  display: block;
+  width: 42%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent), var(--gold));
+  content: "";
+  animation: skeletonSweep 1.15s ease-in-out infinite;
+}
+
 .todayHighlights {
-  padding: 18px 0 22px;
+  padding: 18px 0 24px;
 }
 
 .advancedGames {
-  margin-top: 10px;
-  padding: 22px 0 4px;
+  margin-top: 2px;
+  padding: 26px 0 4px;
   border-top: 1px solid var(--line);
 }
 
 .filterBar {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) minmax(170px, 0.55fr) auto;
-  gap: 12px;
+  grid-template-columns: minmax(230px, 1fr) minmax(180px, 0.58fr) auto auto;
+  gap: 14px;
   align-items: end;
   margin-bottom: 16px;
-  padding: 14px;
+  padding: 16px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background:
@@ -242,36 +400,166 @@ h1 {
     rgba(255, 255, 255, 0.035);
 }
 
-.filterBar label {
+.filterField {
   display: grid;
   gap: 8px;
+  min-width: 0;
 }
 
-.filterBar label span {
+.filterField span,
+.broadcastToggle legend {
   color: var(--muted);
   font-size: 0.76rem;
-  font-weight: 900;
-  text-transform: uppercase;
+  font-weight: 700;
+  text-transform: none;
 }
 
 .filterBar select,
 .filterBar input {
   width: 100%;
-  min-height: 44px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  min-height: 46px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
   border-radius: 8px;
   color: var(--foreground);
-  background: rgba(4, 7, 14, 0.78);
+  background-color: rgba(4, 7, 14, 0.84);
   font: inherit;
   font-size: 0.92rem;
   outline: none;
-  padding: 0 12px;
+  padding: 0 14px;
+}
+
+.filterBar select {
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, rgba(247, 248, 251, 0.76) 50%),
+    linear-gradient(135deg, rgba(247, 248, 251, 0.76) 50%, transparent 50%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1));
+  background-position:
+    calc(100% - 22px) 20px,
+    calc(100% - 16px) 20px,
+    calc(100% - 42px) 11px;
+  background-repeat: no-repeat;
+  background-size:
+    6px 6px,
+    6px 6px,
+    1px 24px;
+  cursor: pointer;
+  padding-right: 56px;
+}
+
+.filterBar select option {
+  color: #f7f8fb;
+  background: #0b1020;
+}
+
+.filterBar input[type="date"] {
+  color-scheme: dark;
+  padding-right: 12px;
+}
+
+.filterBar input[type="date"].is-empty {
+  color: transparent;
+}
+
+.filterBar input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(1) opacity(0.72);
+}
+
+.filterBar input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+.dateInputWrap {
+  position: relative;
+  cursor: pointer;
+}
+
+.dateInputWrap input {
+  position: relative;
+  z-index: 1;
+  cursor: pointer;
+  background-color: transparent;
+}
+
+.dateInputWrap small {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 14px;
+  color: rgba(169, 176, 195, 0.72);
+  font-size: 0.92rem;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.dateInputWrap:focus-within input {
+  border-color: rgba(246, 200, 95, 0.72);
+  box-shadow: 0 0 0 3px rgba(246, 200, 95, 0.1);
 }
 
 .filterBar select:focus,
 .filterBar input:focus {
   border-color: rgba(246, 200, 95, 0.72);
   box-shadow: 0 0 0 3px rgba(246, 200, 95, 0.1);
+}
+
+.broadcastToggle {
+  display: grid;
+  gap: 8px;
+  min-width: 156px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.broadcastToggle legend {
+  margin-bottom: 8px;
+}
+
+.broadcastToggle div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 46px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 8px;
+  background: rgba(4, 7, 14, 0.84);
+}
+
+.broadcastToggle label {
+  position: relative;
+  display: grid;
+  cursor: pointer;
+  place-items: center;
+}
+
+.broadcastToggle label + label {
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.broadcastToggle input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.broadcastToggle label span {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 800;
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.broadcastToggle input:checked + span {
+  color: #ffffff;
+  background: linear-gradient(90deg, rgba(29, 66, 138, 0.94), rgba(200, 16, 46, 0.82));
 }
 
 .filterActions {
@@ -328,6 +616,66 @@ h1 {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.035);
+}
+
+.compactGameSkeleton {
+  min-height: 134px;
+}
+
+.skeletonLine,
+.skeletonLogo {
+  position: relative;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.skeletonLine::after,
+.skeletonLogo::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.13),
+    transparent
+  );
+  content: "";
+  animation: skeletonShimmer 1.25s ease-in-out infinite;
+  transform: translateX(-100%);
+}
+
+.skeletonLine {
+  height: 10px;
+}
+
+.skeletonLine.short {
+  width: 34%;
+}
+
+.skeletonLine.medium {
+  width: 54px;
+}
+
+.skeletonLine.tiny {
+  width: 18px;
+}
+
+.skeletonLine.long {
+  width: 74%;
+}
+
+.skeletonLogo {
+  width: 34px;
+  height: 34px;
+}
+
+.skeletonMatch {
+  display: grid;
+  grid-template-columns: 34px 54px 18px 54px 34px;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .compactGameTop,
@@ -463,22 +811,18 @@ h2 {
 
 .featuredCarousel {
   display: grid;
-  grid-auto-columns: minmax(360px, 1fr);
-  grid-auto-flow: column;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 16px;
-  overflow-x: auto;
-  padding: 4px 4px 16px;
-  scroll-snap-type: x mandatory;
+  padding: 4px;
 }
 
 .featuredGame {
   display: flex;
-  min-height: 330px;
+  min-height: 300px;
   flex-direction: column;
   justify-content: space-between;
-  gap: 22px;
-  scroll-snap-align: start;
-  padding: 22px;
+  gap: 16px;
+  padding: 20px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background:
@@ -495,13 +839,25 @@ h2 {
   gap: 12px;
   align-items: center;
   color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 800;
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.featuredTop > span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .status {
-  padding: 7px 10px;
+  flex: 0 0 auto;
+  padding: 6px 9px;
   color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .status.scheduled {
@@ -519,19 +875,24 @@ h2 {
 
 .matchup {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 92px minmax(0, 1fr);
-  gap: 16px;
+  grid-template-columns: minmax(76px, 1fr) 86px minmax(76px, 1fr);
+  gap: 12px;
   align-items: center;
   flex: 1;
 }
 
 .gameTeam {
   display: grid;
-  gap: 12px;
+  grid-template-rows: 68px auto;
+  gap: 10px;
+  justify-items: start;
   min-width: 0;
+  width: 100%;
+  overflow: hidden;
 }
 
 .team-right {
+  justify-items: end;
   text-align: right;
 }
 
@@ -541,8 +902,8 @@ h2 {
 
 .teamLogo {
   display: grid;
-  width: 76px;
-  height: 76px;
+  width: 68px;
+  height: 68px;
   place-items: center;
   justify-self: start;
   border: 1px solid color-mix(in srgb, var(--team-color) 54%, white);
@@ -556,8 +917,8 @@ h2 {
 }
 
 .teamLogo img {
-  width: 56px;
-  height: 56px;
+  width: 50px;
+  height: 50px;
   object-fit: contain;
 }
 
@@ -565,25 +926,54 @@ h2 {
   display: block;
   overflow: hidden;
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.72rem;
+  font-weight: 500;
   line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
+  width: 100%;
 }
 
 .gameTeam strong {
   display: block;
-  overflow-wrap: anywhere;
-  font-size: clamp(1.1rem, 2vw, 1.45rem);
-  line-height: 1.1;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gameTeam > div:last-child {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  max-width: 104px;
+  min-width: 0;
+}
+
+.gameTeam > div:last-child strong {
+  font-size: clamp(1.55rem, 3vw, 2rem);
+  line-height: 0.92;
+  letter-spacing: 0;
+}
+
+.teamName {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  color: rgba(247, 248, 251, 0.78);
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .gameTeam small {
   display: block;
-  margin-top: 6px;
+  margin-top: 3px;
   color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 800;
+  font-size: 0.68rem;
+  font-weight: 500;
 }
 
 .scoreColumn {
@@ -595,8 +985,8 @@ h2 {
 
 .versus {
   display: grid;
-  width: 64px;
-  height: 64px;
+  width: 54px;
+  height: 54px;
   place-items: center;
   border: 1px solid var(--line);
   border-radius: 50%;
@@ -610,9 +1000,10 @@ h2 {
 .score {
   display: flex;
   align-items: baseline;
-  gap: 8px;
-  font-size: 1.75rem;
-  font-weight: 900;
+  gap: 6px;
+  font-size: clamp(1.35rem, 3vw, 1.65rem);
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .score small {
@@ -626,42 +1017,96 @@ h2 {
 
 .time {
   color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 800;
+  font-size: 0.72rem;
+  font-weight: 500;
   text-align: center;
 }
 
-.note {
-  padding-top: 16px;
-  border-top: 1px solid var(--line);
-  color: var(--foreground);
-  font-size: 0.92rem;
-  font-weight: 800;
-  line-height: 1.4;
+.winProbability {
+  display: grid;
+  gap: 6px;
 }
 
-.broadcastLine {
+.winProbabilityTop {
   display: flex;
   justify-content: space-between;
-  gap: 14px;
+  gap: 12px;
   align-items: center;
-  padding: 12px 14px;
-  border: 1px solid rgba(246, 200, 95, 0.22);
-  border-radius: 8px;
-  background: rgba(246, 200, 95, 0.08);
-}
-
-.broadcastLine span {
   color: var(--muted);
-  font-size: 0.76rem;
-  font-weight: 900;
+  font-size: 0.68rem;
+  font-weight: 600;
   text-transform: uppercase;
 }
 
-.broadcastLine strong {
-  color: var(--gold);
-  font-size: 0.92rem;
-  text-align: right;
+.winProbabilityTop strong {
+  color: rgba(247, 248, 251, 0.72);
+}
+
+.winBar {
+  display: flex;
+  min-height: 20px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.winBarSide {
+  display: flex;
+  min-width: 48px;
+  align-items: center;
+  gap: 6px;
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0 8px;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
+}
+
+.featuredMeta {
+  display: flex;
+  min-width: 0;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.featuredMeta span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.featuredMeta span:first-child {
+  color: rgba(247, 248, 251, 0.78);
+}
+
+.winBarSide span,
+.winBarSide strong {
+  position: relative;
+  z-index: 1;
+}
+
+.awaySide {
+  justify-content: flex-start;
+  width: var(--away-width);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--away-color) 92%, #ffffff), var(--away-color)),
+    var(--away-color);
+}
+
+.homeSide {
+  justify-content: flex-end;
+  width: var(--home-width);
+  background:
+    linear-gradient(90deg, var(--home-color), color-mix(in srgb, var(--home-color) 88%, #ffffff)),
+    var(--home-color);
 }
 
 @keyframes tickerScroll {
@@ -674,7 +1119,35 @@ h2 {
   }
 }
 
+@keyframes skeletonShimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes skeletonSweep {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(260%);
+  }
+}
+
 @media (max-width: 980px) {
+  .layoutWithAds {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .adRail {
+    display: none;
+  }
+
+  .adBanner {
+    min-height: 78px;
+  }
+
   .hero {
     grid-template-columns: 1fr;
   }
@@ -686,7 +1159,7 @@ h2 {
 
 @media (max-width: 700px) {
   .pageShell {
-    padding: 86px 18px 18px;
+    padding: 132px 18px 18px;
   }
 
   .liveTicker {
@@ -702,6 +1175,27 @@ h2 {
 
   .tickerTrack {
     min-height: 48px;
+  }
+
+  .sportNav {
+    top: 82px;
+    min-height: 50px;
+    padding: 0 18px;
+  }
+
+  .sportNavInner {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .sportNavInner div {
+    gap: 18px;
+    overflow-x: auto;
+  }
+
+  .sportNav a {
+    flex: 0 0 auto;
   }
 
   .hero {
@@ -730,10 +1224,6 @@ h2 {
     grid-template-columns: 1fr 1fr;
   }
 
-  .featuredCarousel {
-    grid-auto-columns: minmax(280px, 88vw);
-  }
-
   .featuredGame {
     min-height: auto;
   }
@@ -747,7 +1237,9 @@ h2 {
   .gameTeam,
   .team-right {
     grid-template-columns: 66px minmax(0, 1fr);
+    grid-template-rows: auto;
     align-items: center;
+    justify-items: start;
     text-align: left;
   }
 
@@ -767,6 +1259,15 @@ h2 {
 
   .scoreColumn {
     order: 3;
+  }
+
+  .gameTeam > div:last-child,
+  .gameTeam strong {
+    max-width: 100%;
+  }
+
+  .gameTeam > div:last-child strong {
+    font-size: 1.8rem;
   }
 
   .compactGamesGrid {

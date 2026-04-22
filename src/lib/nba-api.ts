@@ -81,8 +81,29 @@ type NbaScheduleResponse = {
   };
 };
 
+type NbaChannelStream = Partial<{
+  uniqueName: string;
+  title: string;
+  status: string;
+  isRadio: boolean;
+}>;
+
+type NbaChannelsResponse = {
+  channels: {
+    gameDate: string;
+    games: {
+      gameId: string;
+      streams: NbaChannelStream[];
+    }[];
+  };
+};
+
+type BrazilBroadcastChannel = "Prime Video" | "ESPN/Disney+" | "NBA League Pass";
+
 const SCOREBOARD_URL =
   "https://cdn.nba.com/static/json/liveData/scoreboard/todaysScoreboard_00.json";
+const CHANNELS_URL =
+  "https://cdn.nba.com/static/json/liveData/channels/v2/channels_00.json";
 const SCHEDULE_URL =
   "https://cdn.nba.com/static/json/staticData/scheduleLeagueV2_1.json";
 
@@ -109,6 +130,39 @@ const TEAM_COLORS: Record<string, string> = {
   TOR: "#ce1141",
   WAS: "#002b5c"
 };
+
+const NBA_TEAM_IDS = new Set([
+  1610612737,
+  1610612738,
+  1610612739,
+  1610612740,
+  1610612741,
+  1610612742,
+  1610612743,
+  1610612744,
+  1610612745,
+  1610612746,
+  1610612747,
+  1610612748,
+  1610612749,
+  1610612750,
+  1610612751,
+  1610612752,
+  1610612753,
+  1610612754,
+  1610612755,
+  1610612756,
+  1610612757,
+  1610612758,
+  1610612759,
+  1610612760,
+  1610612761,
+  1610612762,
+  1610612763,
+  1610612764,
+  1610612765,
+  1610612766
+]);
 
 const FALLBACK_TODAY_GAMES: NbaGame[] = [
   {
@@ -483,24 +537,175 @@ function translateSeries(seriesText: string) {
     .replace("leads series", "lidera a serie");
 }
 
-function normalizeGame(game: NbaApiGame, gameDate: string): NbaGame {
+function mapBrazilianChannel(stream: NbaChannelStream): BrazilBroadcastChannel | null {
+  const uniqueName = stream.uniqueName ?? "";
+  const title = stream.title ?? "";
+  const normalized = `${uniqueName} ${title}`.toLowerCase();
+
+  if (stream.isRadio) {
+    return null;
+  }
+
+  if (
+    normalized.includes("portuguese-brazil-amazon") ||
+    normalized.includes("portuguese (prime video)")
+  ) {
+    return "Prime Video";
+  }
+
+  if (normalized.includes("espn")) {
+    return "ESPN/Disney+";
+  }
+
+  if (normalized.includes("league pass")) {
+    return "NBA League Pass";
+  }
+
+  return null;
+}
+
+function getBroadcastMatchKey(game: Pick<NbaGame, "date" | "awayTeam" | "homeTeam">) {
+  return `${game.date}:${game.awayTeam.abbreviation}:${game.homeTeam.abbreviation}`;
+}
+
+type TodayBroadcastMaps = {
+  byGameId: Map<string, string[]>;
+  byMatch: Map<string, string[]>;
+};
+
+async function getTodayBroadcastChannels(): Promise<TodayBroadcastMaps> {
+  try {
+    const [channelsResponse, scoreboardResponse] = await Promise.all([
+      fetch(CHANNELS_URL, {
+        cache: "no-store",
+        next: {
+          revalidate: 0
+        }
+      }),
+      fetch(SCOREBOARD_URL, {
+        cache: "no-store",
+        next: {
+          revalidate: 0
+        }
+      })
+    ]);
+
+    if (!channelsResponse.ok) {
+      return {
+        byGameId: new Map<string, string[]>(),
+        byMatch: new Map<string, string[]>()
+      };
+    }
+
+    const data = (await channelsResponse.json()) as NbaChannelsResponse;
+    const scoreboardData = scoreboardResponse.ok
+      ? ((await scoreboardResponse.json()) as NbaScoreboardResponse)
+      : null;
+    const scoreboardGamesById = new Map(
+      scoreboardData?.scoreboard.games.map((game) => [game.gameId, game]) ?? []
+    );
+    const byGameId = new Map<string, string[]>();
+    const byMatch = new Map<string, string[]>();
+
+    data.channels.games.forEach((game) => {
+      const channels = Array.from(
+        new Set(
+          game.streams
+            .map(mapBrazilianChannel)
+            .filter(
+              (channel): channel is BrazilBroadcastChannel => Boolean(channel)
+            )
+        )
+      );
+
+      if (channels.length) {
+        byGameId.set(game.gameId, channels);
+
+        const scoreboardGame = scoreboardGamesById.get(game.gameId);
+
+        if (scoreboardGame && scoreboardData) {
+          const matchKey = getBroadcastMatchKey({
+            date: scoreboardData.scoreboard.gameDate,
+            awayTeam: normalizeTeam(scoreboardGame.awayTeam),
+            homeTeam: normalizeTeam(scoreboardGame.homeTeam)
+          });
+
+          byMatch.set(matchKey, channels);
+        }
+      }
+    });
+
+    return {
+      byGameId,
+      byMatch
+    };
+  } catch {
+    return {
+      byGameId: new Map<string, string[]>(),
+      byMatch: new Map<string, string[]>()
+    };
+  }
+}
+
+async function withTodayBroadcastChannels(games: NbaGame[]) {
+  const broadcasts = await getTodayBroadcastChannels();
+
+  if (!broadcasts.byGameId.size && !broadcasts.byMatch.size) {
+    return games;
+  }
+
+  return games.map((game) => {
+    const matchChannels = broadcasts.byMatch.get(getBroadcastMatchKey(game)) ?? [];
+    const gameIdChannels = broadcasts.byGameId.get(game.id) ?? [];
+
+    return {
+      ...game,
+      broadcastsBrazil: getBroadcastsBrazil({
+        gameId: game.id,
+        date: game.date,
+        time: game.timeBr,
+        awayTeam: game.awayTeam.abbreviation,
+        homeTeam: game.homeTeam.abbreviation,
+        channels: [...game.broadcastsBrazil, ...matchChannels, ...gameIdChannels]
+      })
+    };
+  });
+}
+
+function normalizeGame(
+  game: NbaApiGame,
+  gameDate: string,
+  broadcasts: TodayBroadcastMaps = {
+    byGameId: new Map<string, string[]>(),
+    byMatch: new Map<string, string[]>()
+  }
+): NbaGame {
   const stage = [game.gameLabel, game.gameSubLabel].filter(Boolean).join(" - ");
   const awayTeam = normalizeTeam(game.awayTeam);
   const homeTeam = normalizeTeam(game.homeTeam);
+  const timeBr = formatTimeBr(game.gameTimeUTC);
 
   return {
     id: game.gameId,
     date: gameDate,
     status: mapStatus(game.gameStatus),
     statusText: game.gameStatusText,
-    timeBr: formatTimeBr(game.gameTimeUTC),
+    timeBr,
     stage: translateStage(stage || "NBA"),
     seriesText: translateSeries(game.seriesText),
-    broadcastsBrazil: getBroadcastsBrazil(
-      game.gameId,
-      awayTeam.abbreviation,
-      homeTeam.abbreviation
-    ),
+    broadcastsBrazil: getBroadcastsBrazil({
+      gameId: game.gameId,
+      date: gameDate,
+      time: timeBr,
+      awayTeam: awayTeam.abbreviation,
+      homeTeam: homeTeam.abbreviation,
+      channels: [
+        ...(broadcasts.byMatch.get(
+          getBroadcastMatchKey({ date: gameDate, awayTeam, homeTeam })
+        ) ?? []),
+        ...(broadcasts.byGameId.get(game.gameId) ?? [])
+      ]
+    }),
     period: game.period,
     clock: game.gameClock,
     homeTeam,
@@ -519,20 +724,24 @@ function normalizeScheduleGame(game: NbaScheduleGame, gameDate: string): NbaGame
   }
 
   const stage = [game.gameLabel, game.gameSubLabel].filter(Boolean).join(" - ");
+  const parsedDate = parseScheduleDate(gameDate);
+  const timeBr = formatTimeBr(gameTimeUTC);
 
   return {
     id: gameId,
-    date: parseScheduleDate(gameDate),
+    date: parsedDate,
     status: mapStatus(game.gameStatus ?? 1),
     statusText: game.gameStatusText ?? "",
-    timeBr: formatTimeBr(gameTimeUTC),
+    timeBr,
     stage: translateStage(stage || "NBA"),
     seriesText: translateSeries(game.seriesText ?? ""),
-    broadcastsBrazil: getBroadcastsBrazil(
+    broadcastsBrazil: getBroadcastsBrazil({
       gameId,
-      awayTeam.abbreviation,
-      homeTeam.abbreviation
-    ),
+      date: parsedDate,
+      time: timeBr,
+      awayTeam: awayTeam.abbreviation,
+      homeTeam: homeTeam.abbreviation
+    }),
     period: 0,
     clock: "",
     homeTeam,
@@ -546,12 +755,15 @@ export function getTeamLogo(teamId: number) {
 
 export async function getTodayGames(): Promise<NbaGame[]> {
   try {
-    const response = await fetch(SCOREBOARD_URL, {
-      cache: "no-store",
-      next: {
-        revalidate: 0
-      }
-    });
+    const [response, broadcasts] = await Promise.all([
+      fetch(SCOREBOARD_URL, {
+        cache: "no-store",
+        next: {
+          revalidate: 0
+        }
+      }),
+      getTodayBroadcastChannels()
+    ]);
 
     if (!response.ok) {
       return FALLBACK_TODAY_GAMES;
@@ -560,7 +772,7 @@ export async function getTodayGames(): Promise<NbaGame[]> {
     const data = (await response.json()) as NbaScoreboardResponse;
 
     return data.scoreboard.games.map((game) =>
-      normalizeGame(game, data.scoreboard.gameDate)
+      normalizeGame(game, data.scoreboard.gameDate, broadcasts)
     );
   } catch {
     return FALLBACK_TODAY_GAMES;
@@ -610,7 +822,7 @@ export async function getDefaultGameWindow() {
     )
     .slice(0, 4);
 
-  return [...finished, ...upcoming].slice(0, 10);
+  return withTodayBroadcastChannels([...finished, ...upcoming].slice(0, 10));
 }
 
 export async function getScheduleTeams() {
@@ -623,22 +835,36 @@ export async function getScheduleTeams() {
   });
 
   return Array.from(teamMap.values())
-    .filter((team) => team.id)
+    .filter((team) => NBA_TEAM_IDS.has(team.id))
     .sort((a, b) => `${a.city} ${a.name}`.localeCompare(`${b.city} ${b.name}`));
 }
 
-export async function searchScheduleGames(filters: { teamId?: number; date?: string }) {
+function hasBrazilianBroadcast(game: NbaGame) {
+  return game.broadcastsBrazil.some((channel) => channel !== "NBA League Pass");
+}
+
+export async function searchScheduleGames(filters: {
+  teamId?: number;
+  date?: string;
+  broadcastScope?: "all" | "br";
+}) {
   const games = await getScheduleGames();
 
-  return games
-    .filter((game) => {
-      const matchesTeam =
-        !filters.teamId ||
-        game.homeTeam.id === filters.teamId ||
-        game.awayTeam.id === filters.teamId;
-      const matchesDate = !filters.date || game.date === filters.date;
+  const filteredGames = games.filter((game) => {
+    const matchesTeam =
+      !filters.teamId ||
+      game.homeTeam.id === filters.teamId ||
+      game.awayTeam.id === filters.teamId;
+    const matchesDate = !filters.date || game.date === filters.date;
 
-      return matchesTeam && matchesDate;
-    })
-    .slice(0, 40);
+    return matchesTeam && matchesDate;
+  });
+
+  const hydratedGames = await withTodayBroadcastChannels(filteredGames);
+
+  if (filters.broadcastScope === "br") {
+    return hydratedGames.filter(hasBrazilianBroadcast).slice(0, 40);
+  }
+
+  return hydratedGames.slice(0, 40);
 }
