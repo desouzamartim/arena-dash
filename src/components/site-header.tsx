@@ -1,7 +1,11 @@
 "use client";
 
+import { getBroadcastLabel } from "@/lib/nba-game-format";
+import { leagues } from "@/lib/leagues";
 import { getTeamLogo, NbaGame } from "@/lib/nba-api";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 function Ticker({ games }: { games: NbaGame[] }) {
   const liveGames = games.filter((game) => game.status === "live");
@@ -27,9 +31,7 @@ function Ticker({ games }: { games: NbaGame[] }) {
               </strong>
               <span>{game.homeTeam.abbreviation}</span>
               <Image src={getTeamLogo(game.homeTeam.id)} alt="" width={26} height={26} />
-              {game.broadcastsBrazil.length > 0 ? (
-                <em>{game.broadcastsBrazil.join(" + ")}</em>
-              ) : null}
+              {game.broadcastsBrazil.length > 0 ? <em>{getBroadcastLabel(game.broadcastsBrazil)}</em> : null}
             </div>
           ))}
         </div>
@@ -39,15 +41,31 @@ function Ticker({ games }: { games: NbaGame[] }) {
 }
 
 function SportNav() {
+  const pathname = usePathname();
+
   return (
     <nav className="sportNav" aria-label="Navegacao de esportes">
       <div className="sportNavInner">
         <strong>ArenaDash</strong>
         <div>
-          <a aria-disabled="true">NBA</a>
-          <a aria-disabled="true">NFL</a>
-          <a aria-disabled="true">NHL</a>
-          <a aria-disabled="true">MLB</a>
+          <Link href="/" aria-current={pathname === "/" ? "page" : undefined}>
+            INICIO
+          </Link>
+          {leagues.map((league) => {
+            const leaguePath = `/${league.slug}`;
+            const isCurrent =
+              pathname === leaguePath || pathname.startsWith(`/${league.slug}-`);
+
+            return (
+              <Link
+                href={leaguePath}
+                aria-current={isCurrent ? "page" : undefined}
+                key={league.slug}
+              >
+                {league.name}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </nav>

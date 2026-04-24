@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  formatGameDateShort,
+  getBroadcastLabel,
+  getGameStatusLabel
+} from "@/lib/nba-game-format";
 import { getTeamLogo, NbaGame, NbaTeam } from "@/lib/nba-api";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,56 +15,15 @@ type AdvancedGamesFilterProps = {
   teams: NbaTeam[];
 };
 
-function formatDate(date: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "short",
-    timeZone: "UTC"
-  }).format(new Date(`${date}T00:00:00Z`));
-}
-
-function getGameStatus(game: NbaGame) {
-  if (game.status === "final") {
-    return "Finalizado";
-  }
-
-  if (game.status === "live") {
-    return formatLiveClock(game.period, game.clock);
-  }
-
-  return `${game.timeBr} BRT`;
-}
-
-function formatLiveClock(period: number, clock: string) {
-  const periodLabel = period > 0 ? `${period}o quarto` : "Ao vivo";
-  const match = clock.match(/PT(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?/);
-
-  if (!match) {
-    return periodLabel;
-  }
-
-  const minutes = Number(match[1] ?? 0);
-  const seconds = Math.floor(Number(match[2] ?? 0));
-
-  if (minutes === 0 && seconds === 0) {
-    return periodLabel;
-  }
-
-  return `${periodLabel} ${minutes}:${seconds.toString().padStart(2, "0")}`;
-}
-
 function CompactGameCard({ game }: { game: NbaGame }) {
   const hasScore = game.status === "final";
-  const broadcasts =
-    game.broadcastsBrazil.length > 0
-      ? game.broadcastsBrazil.join(" + ")
-      : "NBA League Pass";
+  const broadcasts = getBroadcastLabel(game.broadcastsBrazil);
 
   return (
-    <Link className="compactGameCard gameCardLink" href={`/jogos/${game.id}`}>
+    <Link className="compactGameCard gameCardLink" href={`/nba-${game.id}`}>
       <div className="compactGameTop">
-        <span className={`compactStatus ${game.status}`}>{getGameStatus(game)}</span>
-        <span>{formatDate(game.date)}</span>
+        <span className={`compactStatus ${game.status}`}>{getGameStatusLabel(game)}</span>
+        <span>{formatGameDateShort(game.date)}</span>
       </div>
 
       <div className="compactMatch">

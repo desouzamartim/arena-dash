@@ -1,6 +1,11 @@
 "use client";
 
 import { SiteHeader } from "@/components/site-header";
+import {
+  getBroadcastLabel,
+  getGameDetailTimeLabel,
+  getLiveDashboardStatusLabel
+} from "@/lib/nba-game-format";
 import { WinProbability } from "@/lib/odds-api";
 import { getTeamLogo, NbaGame, NbaTeam } from "@/lib/nba-api";
 import Image from "next/image";
@@ -44,48 +49,6 @@ function TeamBlock({
       </div>
     </div>
   );
-}
-
-function formatLiveClock(period: number, clock: string) {
-  const periodLabel = period > 0 ? `${period}o quarto` : "Ao vivo";
-  const match = clock.match(/PT(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?/);
-
-  if (!match) {
-    return periodLabel;
-  }
-
-  const minutes = Number(match[1] ?? 0);
-  const seconds = Math.floor(Number(match[2] ?? 0));
-
-  if (minutes === 0 && seconds === 0) {
-    return periodLabel;
-  }
-
-  return `${periodLabel} ${minutes}:${seconds.toString().padStart(2, "0")}`;
-}
-
-function getStatusLabel(game: NbaGame) {
-  if (game.status === "live") {
-    return formatLiveClock(game.period, game.clock);
-  }
-
-  if (game.status === "final") {
-    return "Final";
-  }
-
-  return `${game.timeBr} BRT`;
-}
-
-function getGameDetailLabel(game: NbaGame) {
-  if (game.status === "scheduled") {
-    return `Horario: ${game.timeBr} BRT`;
-  }
-
-  if (game.status === "live") {
-    return formatLiveClock(game.period, game.clock);
-  }
-
-  return "Partida encerrada";
 }
 
 function ScoreBlock({ game }: { game: NbaGame }) {
@@ -149,22 +112,19 @@ function FeaturedGame({
   game: NbaGame;
   prediction: WinProbability;
 }) {
-  const broadcasts =
-    game.broadcastsBrazil.length > 0
-      ? game.broadcastsBrazil.join(" + ")
-      : "NBA League Pass";
+  const broadcasts = getBroadcastLabel(game.broadcastsBrazil);
 
   return (
-    <Link className="featuredGame gameCardLink" href={`/jogos/${game.id}`}>
+    <Link className="featuredGame gameCardLink" href={`/nba-${game.id}`}>
       <div className="featuredTop">
-        <span className={`status ${game.status}`}>{getStatusLabel(game)}</span>
+        <span className={`status ${game.status}`}>{getLiveDashboardStatusLabel(game)}</span>
         <span>{game.stage}</span>
       </div>
       <div className="matchup">
         <TeamBlock team={game.awayTeam} />
         <div className="scoreColumn">
           <ScoreBlock game={game} />
-          <span className="time">{getGameDetailLabel(game)}</span>
+          <span className="time">{getGameDetailTimeLabel(game)}</span>
         </div>
         <TeamBlock team={game.homeTeam} align="right" />
       </div>

@@ -1,64 +1,71 @@
-import { AdvancedGamesFilter } from "@/components/advanced-games-filter";
-import { LiveGamesDashboard } from "@/components/live-games-dashboard";
-import { getWinProbabilities, WinProbability } from "@/lib/odds-api";
-import {
-  getDefaultGameWindow,
-  getScheduleTeams,
-  getTodayGames
-} from "@/lib/nba-api";
+import { AdBanner, PageWithAds } from "@/components/layout/page-with-ads";
+import { SiteHeader } from "@/components/site-header";
+import { leagues } from "@/lib/leagues";
+import { getTodayGames } from "@/lib/nba-api";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const [todayGames, defaultGames, teams] = await Promise.all([
-    getTodayGames(),
-    getDefaultGameWindow(),
-    getScheduleTeams()
-  ]);
-  const predictions = await getWinProbabilities(todayGames);
-  const predictionsByGameId = Object.fromEntries(
-    todayGames.map((game) => [
-      game.id,
-      predictions.get(game.id) ??
-        ({
-          away: 50,
-          home: 50,
-          source: "estimativa"
-        } satisfies WinProbability)
-    ])
-  );
+  const todayGames = await getTodayGames();
+  const liveGames = todayGames.filter((game) => game.status === "live").length;
+  const finishedGames = todayGames.filter((game) => game.status === "final").length;
 
   return (
     <main className="pageShell">
-      <div className="layoutWithAds">
-        <aside className="adRail adRailLeft" aria-label="Publicidade lateral esquerda">
-          <div className="adSlot">
-            <span>Ad</span>
-          </div>
-        </aside>
-
-        <div className="mainColumn">
-          <LiveGamesDashboard
-            initialGames={todayGames}
-            predictions={predictionsByGameId}
-          >
-            <div className="adBanner adBannerMiddle" aria-label="Publicidade entre secoes">
-              <span>Ad</span>
+      <SiteHeader games={todayGames} />
+      <PageWithAds>
+          <section className="homeIntro">
+            <div>
+              <span className="eyebrow">Inicio</span>
+              <h1>ArenaDash</h1>
+              <p>
+                Um painel esportivo em tempo real para acompanhar jogos,
+                transmissoes, estatisticas e conteudos relacionados.
+              </p>
             </div>
-            <AdvancedGamesFilter initialGames={defaultGames} teams={teams} />
-          </LiveGamesDashboard>
 
-          <div className="adBanner adBannerBottom" aria-label="Publicidade inferior">
-            <span>Ad</span>
-          </div>
-        </div>
+            <div className="homeStats">
+              <div>
+                <span>{todayGames.length}</span>
+                <strong>Jogos NBA hoje</strong>
+              </div>
+              <div>
+                <span>{liveGames}</span>
+                <strong>Ao vivo agora</strong>
+              </div>
+              <div>
+                <span>{finishedGames}</span>
+                <strong>Finalizados</strong>
+              </div>
+            </div>
+          </section>
 
-        <aside className="adRail adRailRight" aria-label="Publicidade lateral direita">
-          <div className="adSlot">
-            <span>Ad</span>
-          </div>
-        </aside>
-      </div>
+          <section className="sportsHub">
+            <div className="sectionHeader">
+              <div>
+                <span className="eyebrow">Esportes</span>
+                <h2>Escolha uma liga</h2>
+              </div>
+              <p>
+                A NBA ja esta ativa. As proximas ligas ficam reservadas para a
+                expansao do ArenaDash.
+              </p>
+            </div>
+
+            <div className="sportsHubGrid">
+              {leagues.map((league) => (
+                <Link className="sportHubCard" href={`/${league.slug}`} key={league.slug}>
+                  <span>{league.status}</span>
+                  <strong>{league.name}</strong>
+                  <p>{league.description}</p>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          <AdBanner className="adBanner adBannerBottom" ariaLabel="Publicidade inferior" />
+      </PageWithAds>
     </main>
   );
 }
