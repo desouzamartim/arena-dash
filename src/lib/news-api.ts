@@ -9,6 +9,15 @@ export type GameNewsArticle = {
   imageUrl?: string;
 };
 
+export type LeagueBreakingNewsArticle = {
+  title: string;
+  url: string;
+  source: string;
+  publishedAt: string;
+  leagueName: string;
+  leagueSlug: string;
+};
+
 const GOOGLE_NEWS_RSS_URL = "https://news.google.com/rss/search";
 
 function decodeHtml(value: string) {
@@ -73,7 +82,7 @@ function getImageUrl(item: string) {
   return getAttributeValue(imageMatch[0], "src") || undefined;
 }
 
-function getPublishedTimestamp(article: GameNewsArticle) {
+function getPublishedTimestamp(article: { publishedAt: string }) {
   const timestamp = new Date(article.publishedAt).getTime();
 
   return Number.isNaN(timestamp) ? 0 : timestamp;
@@ -139,6 +148,79 @@ async function fetchGoogleNews(query: string, language: "pt" | "en") {
   }
 
   return parseGoogleNewsFeed(await response.text());
+}
+
+function buildLeagueNewsQuery(leagueName: string, language: "pt" | "en") {
+  const leagueContextByLanguage: Record<"pt" | "en", Record<string, string>> = {
+    pt: {
+      NBA: "playoffs OR lesao OR troca OR classificacao",
+      NFL: "draft OR troca OR lesao OR calendario",
+      NHL: "playoffs OR lesao OR troca OR classificacao",
+      MLB: "lesao OR troca OR classificacao OR temporada"
+    },
+    en: {
+      NBA: "playoffs OR injuries OR trade OR standings",
+      NFL: "draft OR trade OR injuries OR schedule",
+      NHL: "playoffs OR injuries OR trade OR standings",
+      MLB: "injuries OR trade OR standings OR opening day"
+    }
+  };
+
+  return `"${leagueName}" ${leagueContextByLanguage[language][leagueName] ?? "breaking news"}`;
+}
+
+export async function getLeagueBreakingNews(
+  leagues: Array<{ name: string; slug: string }>,
+  limit = 4
+) {
+  try {
+    const feeds = await Promise.all(
+      leagues.map(async (league) => {
+        const portugueseArticles = await fetchGoogleNews(
+          buildLeagueNewsQuery(league.name, "pt"),
+          "pt"
+        );
+
+        const englishArticles =
+          portugueseArticles.length >= 2
+            ? []
+            : await fetchGoogleNews(buildLeagueNewsQuery(league.name, "en"), "en");
+
+        const articlesByUrl = new Map<string, LeagueBreakingNewsArticle>();
+
+        [...portugueseArticles, ...englishArticles].forEach((article) => {
+          if (!articlesByUrl.has(article.url)) {
+            articlesByUrl.set(article.url, {
+              title: article.title,
+              url: article.url,
+              source: article.source,
+              publishedAt: article.publishedAt,
+              leagueName: league.name,
+              leagueSlug: league.slug
+            });
+          }
+        });
+
+        return Array.from(articlesByUrl.values())
+          .sort((a, b) => getPublishedTimestamp(b) - getPublishedTimestamp(a))
+          .slice(0, 2);
+      })
+    );
+
+    const articlesByUrl = new Map<string, LeagueBreakingNewsArticle>();
+
+    feeds.flat().forEach((article) => {
+      if (!articlesByUrl.has(article.url)) {
+        articlesByUrl.set(article.url, article);
+      }
+    });
+
+    return Array.from(articlesByUrl.values())
+      .sort((a, b) => getPublishedTimestamp(b) - getPublishedTimestamp(a))
+      .slice(0, limit);
+  } catch {
+    return [];
+  }
 }
 
 export async function getGameNews(game: NbaGame) {

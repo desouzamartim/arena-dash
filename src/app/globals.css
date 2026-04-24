@@ -360,6 +360,177 @@ p {
   background: var(--surface);
 }
 
+.homeNowSection,
+.homeBreakingSection {
+  padding: 18px;
+}
+
+.homeBreakingSection {
+  margin-top: 12px;
+}
+
+.homeNowGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.homeNowCard {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: inherit;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+    rgba(255, 255, 255, 0.03);
+  text-decoration: none;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease,
+    background 160ms ease;
+}
+
+.homeNowCard:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.055);
+  transform: translateY(-2px);
+}
+
+.homeNowCardTop,
+.homeNowMeta,
+.homeBreakingItem div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.homeNowLeagueTag,
+.homeNowStatus {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.homeNowLeagueTag {
+  color: #ffffff;
+  background: rgba(29, 66, 138, 0.9);
+}
+
+.homeNowLeagueTag.is-nba {
+  background: linear-gradient(90deg, rgba(29, 66, 138, 0.96), rgba(200, 16, 46, 0.88));
+}
+
+.homeNowStatus {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(247, 248, 251, 0.86);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.homeNowStatus.is-live {
+  color: #d6ffe9;
+  background: rgba(32, 208, 107, 0.12);
+  border-color: rgba(32, 208, 107, 0.28);
+}
+
+.homeNowStatus.is-final {
+  color: rgba(247, 248, 251, 0.74);
+}
+
+.homeNowMatchup {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.homeNowMatchup > div {
+  min-width: 0;
+}
+
+.homeNowMatchup strong {
+  display: block;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.homeNowMatchup small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.homeNowScore {
+  display: grid;
+  min-width: 72px;
+  justify-items: center;
+}
+
+.homeNowScore span {
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.homeNowMeta {
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.homeNowMeta span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.homeBreakingList {
+  display: grid;
+  gap: 8px;
+}
+
+.homeBreakingItem {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.03);
+  text-decoration: none;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.homeBreakingItem:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.homeBreakingItem strong {
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.homeBreakingItem div {
+  color: var(--muted);
+  font-size: 0.75rem;
+ }
+
 .notFoundHero {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
@@ -1951,6 +2122,7 @@ h2 {
 
   .homeIntro,
   .notFoundHero,
+  .homeNowGrid,
   .notFoundActionsGrid,
   .sportsHubGrid {
     grid-template-columns: 1fr;
@@ -1958,6 +2130,16 @@ h2 {
 
   .homeStats {
     max-width: 560px;
+  }
+
+  .homeNowMatchup {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+
+  .homeNowScore {
+    min-width: 0;
+    justify-items: start;
   }
 
   .gameDetailGrid,
@@ -2033,6 +2215,13 @@ h2 {
 
   .homeStats {
     grid-template-columns: 1fr;
+  }
+
+  .homeNowCardTop,
+  .homeNowMeta,
+  .homeBreakingItem div {
+    display: grid;
+    justify-content: start;
   }
 
   .contentContainer {
