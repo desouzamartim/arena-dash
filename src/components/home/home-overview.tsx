@@ -74,35 +74,32 @@ export function HomeOverview({
         {gameFeedItems.length > 0 ? (
           <div className="homeNowGrid">
             {gameFeedItems.map((game) => (
-              <Link className="homeNowCard" href={game.href} key={game.id}>
+              <Link className={`homeNowCard is-${game.leagueSlug}`} href={game.href} key={game.id}>
                 <div className="homeNowCardTop">
                   <span className={`homeNowLeagueTag is-${game.leagueSlug}`}>{game.leagueName}</span>
                   <span className={`homeNowStatus is-${game.status}`}>{game.statusLabel}</span>
                 </div>
 
                 <div className="homeNowMatchup">
-                  <div>
+                  <div className="homeNowTeam">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img className="homeNowTeamLogo" src={game.awayTeamLogo} alt={game.awayTeam} width={26} height={26} />
                     <strong>{game.awayTeam}</strong>
-                    <small>Visitante</small>
                   </div>
                   <div className="homeNowScore">
-                    {game.status === "scheduled" ? (
-                      <span>{game.startLabel}</span>
-                    ) : (
-                      <span>
-                        {game.awayScore} - {game.homeScore}
-                      </span>
-                    )}
+                    <span>
+                      {game.status === "scheduled" ? game.startLabel : `${game.awayScore}–${game.homeScore}`}
+                    </span>
                   </div>
-                  <div>
+                  <div className="homeNowTeam homeNowTeamHome">
                     <strong>{game.homeTeam}</strong>
-                    <small>Casa</small>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img className="homeNowTeamLogo" src={game.homeTeamLogo} alt={game.homeTeam} width={26} height={26} />
                   </div>
                 </div>
 
-                <div className="homeNowMeta">
-                  <span>{game.stage}</span>
-                  <span>{game.startLabel}</span>
+                <div className="homeNowBroadcast">
+                  <span>{game.broadcasts.length > 0 ? game.broadcasts.join(" · ") : "NBA League Pass"}</span>
                 </div>
               </Link>
             ))}

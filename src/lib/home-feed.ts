@@ -1,5 +1,5 @@
 import { getGameStatusLabel } from "@/lib/nba-game-format";
-import { NbaGame } from "@/lib/nba-api";
+import { NbaGame, getTeamLogo } from "@/lib/nba-api";
 
 export type HomeGameFeedItem = {
   id: string;
@@ -11,9 +11,12 @@ export type HomeGameFeedItem = {
   startLabel: string;
   stage: string;
   awayTeam: string;
+  awayTeamLogo: string;
   homeTeam: string;
+  homeTeamLogo: string;
   awayScore: number;
   homeScore: number;
+  broadcasts: string[];
 };
 
 function getGameStartTimestamp(game: NbaGame) {
@@ -31,22 +34,28 @@ function sortGamesByStartTime(games: NbaGame[]) {
   });
 }
 
-export function getHomeGameFeedItems(todayGames: NbaGame[], limit = 8) {
-  const activeGames = todayGames.filter((game) => game.status !== "final");
-  const sourceGames = activeGames.length > 0 ? activeGames : todayGames;
+export function getHomeGameFeedItems(todayGames: NbaGame[]) {
+  const finalGames = sortGamesByStartTime(todayGames.filter((g) => g.status === "final"));
+  const activeGames = sortGamesByStartTime(todayGames.filter((g) => g.status !== "final"));
 
-  return sortGamesByStartTime(sourceGames).slice(0, limit).map((game) => ({
+  const recentFinals = finalGames.slice(-2);
+  const upcomingActive = activeGames.slice(0, 6);
+
+  return [...recentFinals, ...upcomingActive].map((game) => ({
     id: game.id,
     href: `/nba-${game.id}`,
     leagueName: "NBA",
     leagueSlug: "nba",
     status: game.status,
-    statusLabel: getGameStatusLabel(game),
+    statusLabel: game.status === "scheduled" ? "Agendado" : getGameStatusLabel(game),
     startLabel: `${game.timeBr} BRT`,
     stage: game.stage,
     awayTeam: game.awayTeam.abbreviation,
+    awayTeamLogo: getTeamLogo(game.awayTeam.id),
     homeTeam: game.homeTeam.abbreviation,
+    homeTeamLogo: getTeamLogo(game.homeTeam.id),
     awayScore: game.awayTeam.score,
-    homeScore: game.homeTeam.score
+    homeScore: game.homeTeam.score,
+    broadcasts: game.broadcastsBrazil
   }));
 }

@@ -13,7 +13,7 @@ export default async function Home() {
   const liveGames = todayGames.filter((game) => game.status === "live").length;
   const finishedGames = todayGames.filter((game) => game.status === "final").length;
   const [gameFeedItems, breakingNews] = await Promise.all([
-    Promise.resolve(getHomeGameFeedItems(todayGames, 4)),
+    Promise.resolve(getHomeGameFeedItems(todayGames)),
     getLeagueBreakingNews(leagues, 4)
   ]);
 
