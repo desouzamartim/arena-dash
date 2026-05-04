@@ -371,35 +371,31 @@ p {
 
 .homeNowGrid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .homeNowCard {
-  display: grid;
-  gap: 12px;
-  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
   color: inherit;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
-    rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.03);
   text-decoration: none;
   transition:
     border-color 160ms ease,
-    transform 160ms ease,
     background 160ms ease;
 }
 
 .homeNowCard:hover {
   border-color: rgba(255, 255, 255, 0.22);
   background: rgba(255, 255, 255, 0.055);
-  transform: translateY(-2px);
 }
 
 .homeNowCardTop,
-.homeNowMeta,
 .homeBreakingItem div {
   display: flex;
   align-items: center;
@@ -447,54 +443,65 @@ p {
 }
 
 .homeNowMatchup {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  gap: 12px;
+  display: flex;
   align-items: center;
+  gap: 6px;
 }
 
-.homeNowMatchup > div {
+.homeNowTeam {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
   min-width: 0;
 }
 
-.homeNowMatchup strong {
-  display: block;
-  font-size: 1.1rem;
-  line-height: 1;
+.homeNowTeamHome {
+  flex-direction: row-reverse;
 }
 
-.homeNowMatchup small {
-  display: block;
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: 0.68rem;
-  font-weight: 700;
-  text-transform: uppercase;
+.homeNowTeam strong {
+  font-size: 0.88rem;
+  font-weight: 900;
+  line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.homeNowTeamLogo {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .homeNowScore {
-  display: grid;
-  min-width: 72px;
-  justify-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0 4px;
 }
 
 .homeNowScore span {
   color: #ffffff;
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 900;
   white-space: nowrap;
 }
 
-.homeNowMeta {
+.homeNowBroadcast {
   color: var(--muted);
-  font-size: 0.76rem;
-}
-
-.homeNowMeta span:first-child {
-  min-width: 0;
+  font-size: 0.68rem;
+  font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.homeNowCard.is-nba {
+  border-top-color: rgba(29, 66, 138, 0.55);
 }
 
 .homeBreakingList {
@@ -2122,24 +2129,17 @@ h2 {
 
   .homeIntro,
   .notFoundHero,
-  .homeNowGrid,
   .notFoundActionsGrid,
   .sportsHubGrid {
     grid-template-columns: 1fr;
   }
 
+  .homeNowGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .homeStats {
     max-width: 560px;
-  }
-
-  .homeNowMatchup {
-    grid-template-columns: 1fr;
-    justify-items: start;
-  }
-
-  .homeNowScore {
-    min-width: 0;
-    justify-items: start;
   }
 
   .gameDetailGrid,
@@ -2217,8 +2217,10 @@ h2 {
     grid-template-columns: 1fr;
   }
 
-  .homeNowCardTop,
-  .homeNowMeta,
+  .homeNowGrid {
+    grid-template-columns: 1fr;
+  }
+
   .homeBreakingItem div {
     display: grid;
     justify-content: start;
